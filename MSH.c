@@ -2,18 +2,27 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <unistd.h>
 
 #define LOGOUTCODE 0x0500 // hex code for logout
 #define N 10000 //used for infiinite loop breakout
 
-int build_command()
+
+char command_history [100][100] ; // holds up to 100 commands with size of 100
+int command_index=0;
+
+int build_command() //Supposed to fill a map full commands???
 {
+    //search through the table of commands and return a code 
+    // can use a switch
+    // the code gets entered into execute command
     return 0;
 }
-int user_login()
+int user_login() // function for authenticating input against a credentials.txt file
 {
     char username[20];
     char password[20];
+    char userString[40];
     printf("Username: ");
     fgets(username, 20,stdin);
     printf("Password: ");
@@ -22,22 +31,23 @@ int user_login()
     username[strcspn(username, "\n")] = 0;   // without this, `strcmp` would return false
     password[strcspn(password, "\n")] = 0;   // without this, `strcmp` would return false
 
+    strcat(userString ,username);
+    strcat(userString ,password); // userstring is username+password
+
+    //encrpyt userString 
+    //crypt(userString); // (desired string , hash value for encryption)
+
+    //userString[strcspn(userString, "\n")] = 0;   // without this, `strcmp` would return false
 
     size_t len = 100;
     char buffer [len];
-    char * file_username;
-    char * file_password;
 
-    FILE *fp = fopen("credentials.txt", "r");
+    FILE *fp = fopen("credentials.txt", "r"); 
     if (fp != NULL){
         while ( fgets(buffer, len, fp)  != NULL) {
-            file_username = strtok(buffer,",");
-            if (strcmp(username,file_username)==0){
-                file_password = strtok(NULL,",");
-                file_password[strcspn(file_password, "\n")] = 0;   // without this, `strcmp` would return false
-                if(strcmp(password,file_password)==0){
+            buffer[strcspn(buffer, "\n")] = 0;   // without this, `strcmp` would return false
+            if (strcmp(userString,buffer)==0){
                     return 1;
-                }
             }
         }
     }
@@ -45,16 +55,50 @@ int user_login()
     return 0;
 }
 
-int type_prompt()
+int type_prompt() // simply prints out the shell 
 {
-    printf("\nMSH> ");
+    printf("MSH> ");
     return 0;
 }
-int read_command(char *  command, char parameters[10][10])
+
+int pwd(char * password){ // change the logged in suers password
+
+}
+int copy(char * fileName1, char * fileName2){ // copy a file from one directory to another.
+
+}
+int ps(){ // 
+
+}
+int df(){ //
+
+}
+int search(){
+
+}
+int history(){ // return the history of the commands entered -> probably need to stored this information in a file structure?
+    for (size_t i = 0; i < 100; i++)
+    {
+        if (!(strcmp(command_history[i], ""))){ // only print the string if its not empty 
+            printf("%s\n",command_history[i]);
+        }
+    }
+    
+}
+void logout( int * status){ // terminate the script?
+}
+
+int read_command(char *  command, char parameters[10][10]) // reads in inputted line and parse the command from the arguments
 {
-    char  buffer[50];
-    fgets(buffer,50,stdin);
+    char  buffer[100];
+    fgets(buffer,100,stdin);
+
     buffer[strcspn(buffer, "\n")] = 0;   
+    // add this input to the command_history array to be read back with history()
+    strcpy(command_history[command_index] ,buffer);
+    command_index = command_index + 1;
+
+
     strcpy(command,strtok(buffer," "));
 
     int index = 0;
@@ -68,12 +112,11 @@ int read_command(char *  command, char parameters[10][10])
     return 1;
 }
 
-int exec_command(char *command, char parameters[10][10])
+int exec_command(char *command, char parameters[10][10]) // pass in the command and up to 10 arguments
 {
     for (size_t i = 0; i < 10; i++)
     {
         if(strcmp(parameters[i], "")){
-
             printf("%s\n", parameters[i]);
         }
     }
@@ -104,7 +147,6 @@ int main()
                 else
                 { 
                     exec_command(command, parameters); // execute command 
-                    exit(0);
                 } 
             }
             else { 
