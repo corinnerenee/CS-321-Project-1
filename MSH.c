@@ -8,21 +8,105 @@
 #define N 10000 //used for infiinite loop breakout
 
 
-char command_history [100][100] ; // holds up to 100 commands with size of 100
+char command_history [100][100] = {0}; // holds up to 100 commands with size of 100
 int command_index=0;
 
-int build_command() //Supposed to fill a map full commands???
-{
-    //search through the table of commands and return a code 
-    // can use a switch
-    // the code gets entered into execute command
+
+typedef struct {
+    char* key;
+    int value;
+} hash_item;
+
+typedef struct{
+    hash_item ** items;
+    int size;
+    int count;
+}hashtable;
+
+hashtable* create_table(int size) {
+    hashtable* table = (hashtable*) malloc (sizeof(hashtable));
+    table->size = size;
+    table->count = 0;
+    table->items = (hash_item**) calloc (table->size, sizeof(hash_item*));
+    for (int i=0; i<table->size; i++)
+        table->items[i] = NULL;
+ 
+    return table;
+}
+
+hash_item* create_item(char* key, int value) {
+    // Creates a pointer to a new hash table item
+    hash_item* item = (hash_item*) malloc (sizeof(hash_item));
+    item->key = (char*) malloc (strlen(key) + 1);
+    strcpy(item->key, key);
+    item->value =  value;
+    return item;
+}
+
+void table_insert(hashtable* table, char* key, int value) {
+    hash_item* item = create_item(key, value);
+ 
+    hash_item* current_item = table->items[table->count];
+     
+    if (current_item == NULL) {
+        // Key does not exist.
+        if (table->count == table->size) {
+            // Hash Table Full
+            printf("Insert Error: Hash Table is full\n");
+            return;
+        }
+         
+        // Insert directly
+        table->items[table->count] = item; 
+        table->count++;
+    }
+ 
+    else {
+            if (strcmp(current_item->key, key) == 0) {
+                table->items[table->count]->value = value;
+                return;
+            }
+     
+        else {
+            return;
+        }
+    }
+}
+
+int hash_search(hashtable* table, char* key) {
+    // Searches the key in the hashtable
+    // and returns NULL if it doesn't exist
+    for (size_t index = 0; index < table->count; index++)
+    {
+        hash_item* item = table->items[index];
+ 
+        // Ensure that we move to a non NULL item
+        if (item != NULL) {
+            if (strcmp(item->key, key) == 0)
+                return item->value;
+        }
+    }
     return 0;
+}
+
+hashtable * build_command()  
+{
+    hashtable * commands = create_table(100);
+    table_insert(commands,"pwd",1);
+    table_insert(commands,"copy",2);
+    table_insert(commands,"ps",3);
+    table_insert(commands,"df",4);
+    table_insert(commands,"search",5);
+    table_insert(commands,"history",6);
+    table_insert(commands,"logout",LOGOUTCODE);
+    return commands;
 }
 int user_login() // function for authenticating input against a credentials.txt file
 {
     char username[20];
     char password[20];
     char userString[40];
+    memset(userString,0,40);
     printf("Username: ");
     fgets(username, 20,stdin);
     printf("Password: ");
@@ -32,10 +116,11 @@ int user_login() // function for authenticating input against a credentials.txt 
     password[strcspn(password, "\n")] = 0;   // without this, `strcmp` would return false
 
     strcat(userString ,username);
+    strcat(userString, ";");
     strcat(userString ,password); // userstring is username+password
 
     //encrpyt userString 
-    //crypt(userString); // (desired string , hash value for encryption)
+    strcpy(userString,crypt(userString, "AA")); // (desired string , hash value for encryption)
 
     //userString[strcspn(userString, "\n")] = 0;   // without this, `strcmp` would return false
 
@@ -61,7 +146,7 @@ int type_prompt() // simply prints out the shell
     return 0;
 }
 
-int pwd(char * password){ // change the logged in suers password
+int pwd(char * password){ // change the logged in users password
 
 }
 int copy(char * fileName1, char * fileName2){ // copy a file from one directory to another.
@@ -79,7 +164,7 @@ int search(){
 int history(){ // return the history of the commands entered -> probably need to stored this information in a file structure?
     for (size_t i = 0; i < 100; i++)
     {
-        if (!(strcmp(command_history[i], ""))){ // only print the string if its not empty 
+        if ((strcmp(command_history[i], "") != 0)){ // only print the string if its not empty 
             printf("%s\n",command_history[i]);
         }
     }
@@ -88,32 +173,47 @@ int history(){ // return the history of the commands entered -> probably need to
 void logout( int * status){ // terminate the script?
 }
 
-int read_command(char *  command, char parameters[10][10]) // reads in inputted line and parse the command from the arguments
+int read_command(char *  command, hashtable * commands, char parameters[10][10]) // reads in inputted line and parse the command from the arguments
 {
     char  buffer[100];
     fgets(buffer,100,stdin);
+    if (buffer[0] != '\0'){
+        buffer[strcspn(buffer, "\n")] = 0;   
 
-    buffer[strcspn(buffer, "\n")] = 0;   
-    // add this input to the command_history array to be read back with history()
-    strcpy(command_history[command_index] ,buffer);
-    command_index = command_index + 1;
+        strcpy(command,strtok(buffer," "));
+        strcpy(command_history[command_index] ,command);
+        // add this input to the command_history array to be read back with history()
+        command_index = command_index + 1;
 
 
-    strcpy(command,strtok(buffer," "));
+        int index = 0;
+        char * parameter;
+        while(parameter = strtok(NULL," ")){
+            //parameters[index]= parameter;
+            strcpy(parameters[index], parameter);
+            index = index+1;
+        }
+        return hash_search(commands,command);
 
-    int index = 0;
-    char * parameter;
-    while(parameter = strtok(NULL," ")){
-        //parameters[index]= parameter;
-        strcpy(parameters[index], parameter);
-        index = index+1;
     }
-    // need command checking
     return 1;
 }
 
-int exec_command(char *command, char parameters[10][10]) // pass in the command and up to 10 arguments
+int exec_command(int opcode, char parameters[10][10]) // pass in the command and up to 10 arguments
 {
+    if(opcode == 1){
+       // pwd();
+    }else if(opcode == 2){
+        //copy();
+    }else if(opcode == 3){
+        //ps();
+    }else if(opcode == 4){
+        //df();
+    }else if(opcode == 5){
+        //search();
+    }else if(opcode == 6){
+        history();
+    }
     for (size_t i = 0; i < 10; i++)
     {
         if(strcmp(parameters[i], "")){
@@ -126,7 +226,8 @@ int exec_command(char *command, char parameters[10][10]) // pass in the command 
 
 int main()
 {
-    build_command(); /* read in the commands into a table or hash table */
+    hashtable * commands = build_command();
+    hash_item * item = commands->items[0];
     if (user_login()){                /* Authenticate the user */
         int i=0;
         while (i < N)
@@ -135,9 +236,9 @@ int main()
             char  command[20]; // commands can be only 20 characters long
             char parameters[10][10];// up to 10 parameters 
             memset(parameters, 0, sizeof(parameters[0][0]) * 10 * 10);
-            int n = read_command(command, parameters); // input from terminal 
+            int opcode = read_command(command, commands, parameters); // input from terminal 
             int status;
-            if (n > 0)
+            if (opcode > 0)
             { 
                 if (wait(&status)>=0)
                 { 
@@ -146,11 +247,11 @@ int main()
                 }
                 else
                 { 
-                    exec_command(command, parameters); // execute command 
+                    exec_command(opcode, parameters); // execute command 
                 } 
             }
             else { 
-                printf( "Invalid command, try again"); 
+                printf( "Invalid command, try again\n"); 
             }
             i++;
         }
