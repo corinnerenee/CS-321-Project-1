@@ -128,8 +128,6 @@ int user_login() // function for authenticating input against a credentials.txt 
     printf("Password: ");
     fgets(password, 20,stdin);
 
-    
-
     username[strcspn(username, "\n")] = 0;   // without this, `strcmp` would return false
     password[strcspn(password, "\n")] = 0;   // without this, `strcmp` would return false
 
@@ -140,7 +138,7 @@ int user_login() // function for authenticating input against a credentials.txt 
     //encrpyt userString 
     strcpy(userString,crypt(userString, "AA")); // (desired string , hash value for encryption)
     
-    //userString[strcspn(userString, "\n")] = 0;   // without this, `strcmp` would return false
+    userString[strcspn(userString, "\n")] = 0;   // without this, `strcmp` would return false
 
     size_t len = 100;
     char buffer [len];
