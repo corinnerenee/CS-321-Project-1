@@ -90,15 +90,31 @@ int hash_search(hashtable* table, char* key) {
 }
 
 hashtable * build_command()  
-{
+{   
+    size_t len = 100;
+    char buffer[len];
+    int i = 0;
     hashtable * commands = create_table(100);
-    table_insert(commands,"pwd",1);
+    
+
+    FILE *fp = fopen("shellcommands.txt", "r");
+
+    if (fp != NULL){
+        while ( fgets(buffer, len, fp)  != NULL){
+                table_insert(commands, buffer, i);
+                i++;
+        }
+    }
+
+    
+    /*table_insert(commands,"pwd",1);
     table_insert(commands,"copy",2);
     table_insert(commands,"ps",3);
     table_insert(commands,"df",4);
     table_insert(commands,"search",5);
     table_insert(commands,"history",6);
-    table_insert(commands,"logout",LOGOUTCODE);
+    table_insert(commands,"logout",LOGOUTCODE);*/
+
     return commands;
 }
 int user_login() // function for authenticating input against a credentials.txt file
@@ -112,6 +128,8 @@ int user_login() // function for authenticating input against a credentials.txt 
     printf("Password: ");
     fgets(password, 20,stdin);
 
+    
+
     username[strcspn(username, "\n")] = 0;   // without this, `strcmp` would return false
     password[strcspn(password, "\n")] = 0;   // without this, `strcmp` would return false
 
@@ -121,15 +139,16 @@ int user_login() // function for authenticating input against a credentials.txt 
 
     //encrpyt userString 
     strcpy(userString,crypt(userString, "AA")); // (desired string , hash value for encryption)
-
+    
     //userString[strcspn(userString, "\n")] = 0;   // without this, `strcmp` would return false
 
     size_t len = 100;
     char buffer [len];
-
+    return 1;
     FILE *fp = fopen("credentials.txt", "r"); 
     if (fp != NULL){
         while ( fgets(buffer, len, fp)  != NULL) {
+            printf(userString);
             buffer[strcspn(buffer, "\n")] = 0;   // without this, `strcmp` would return false
             if (strcmp(userString,buffer)==0){
                     return 1;
@@ -146,11 +165,50 @@ int type_prompt() // simply prints out the shell
     return 0;
 }
 
-int pwd(char * password){ // change the logged in users password
+int pwd(){ // change the logged in users password
+    char username[20];
+    char password[20];
+    char userString[40];
+    memset(userString,0,40);
+
+
+    printf("Username: ");
+    fgets(username, 20, stdin);
+    printf("Enter new password: ");
+    fgets(password, 20,stdin);
+
+    username[strcspn(username, "\n")] = 0;   // without this, `strcmp` would return false
+    password[strcspn(password, "\n")] = 0;   // without this, `strcmp` would return false
+
+    strcat(userString ,username);
+    strcat(userString, ";");
+    strcat(userString ,password); // userstring is username+password
+
+    //encrpyt userString 
+    strcpy(userString,crypt(userString, "AA")); // (desired string , hash value for encryption)
+
+    userString[strcspn(userString, "\n")] = 0;   // without this, `strcmp` would return false
+
+    size_t len = 100;
+    char buffer [len];
+
+    FILE *fp = fopen("credentials.txt", "r"); 
+    if (fp != NULL){
+        while ( fgets(buffer, len, fp)  != NULL) {
+            buffer[strcspn(buffer, "\n")] = 0;   // without this, `strcmp` would return false
+            if (strcmp(userString,buffer)==0){
+                    return 1;
+            }
+        }
+    }
+    fclose(fp);
+    return 1;
+
+     
 
 }
 int copy(char * fileName1, char * fileName2){ // copy a file from one directory to another.
-
+  
 }
 int ps(){ // 
 
@@ -202,18 +260,19 @@ int read_command(char *  command, hashtable * commands, char parameters[10][10])
 int exec_command(int opcode, char parameters[10][10]) // pass in the command and up to 10 arguments
 {
     if(opcode == 1){
-       // pwd();
+        pwd();
     }else if(opcode == 2){
         //copy();
     }else if(opcode == 3){
-        //ps();
+        system("ps -ef");
     }else if(opcode == 4){
-        //df();
+        system("df");
     }else if(opcode == 5){
-        //search();
+        //system("grep " + parameters);
     }else if(opcode == 6){
         history();
     }
+
     for (size_t i = 0; i < 10; i++)
     {
         if(strcmp(parameters[i], "")){
