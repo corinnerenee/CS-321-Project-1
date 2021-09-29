@@ -237,26 +237,35 @@ int read_command(char *  command, hashtable * commands, char parameters[10][10])
 
 int exec_command(int cid, char parameters[10][10]) // pass in the command and up to 10 arguments
 {
-    if(cid == 1){
+    if(cid == 1){ //change password
         pwd();
-    }else if(cid == 2){
+    }else if(cid == 2){ // copy
         if (parameters[0][0] != '\0' && parameters[1][0] !='\0'  ){ // make sure params are valid
             char command_string[100]="cp ";
             strcat(command_string,parameters[0]);
             strcat(command_string," ");
             strcat(command_string,parameters[1]);
             system(command_string);
+            
         }else{
             printf("Missing Parameters!\n");
         }
-        
-    }else if(cid == 3){
+    }else if(cid == 3){ // ps
         system("ps -ef");
-    }else if(cid == 4){
+    }else if(cid == 4){ // df
         system("df");
-    }else if(cid == 5){
-        //system("grep " + parameters);
-    }else if(cid == 6){
+    }else if(cid == 5){ //search
+        if (parameters[0][0] != '\0' && parameters[1][0] !='\0'  ){ // make sure params are valid
+            char command_string[100]="grep ";
+            strcat(command_string,parameters[0]);
+            strcat(command_string," ");
+            strcat(command_string,parameters[1]);
+            system(command_string);
+            
+        }else{
+            printf("Missing Parameters!\n");
+        }
+    }else if(cid == 6){//history
         history();
     }
     return 0;
