@@ -101,8 +101,9 @@ hashtable * build_command()
 
     if (fp != NULL){
         while ( fgets(buffer, len, fp)  != NULL){
-                table_insert(commands, buffer, i);
-                i++;
+                char *command = strtok(buffer,":");
+                int cid = atoi(strtok(NULL,":"));
+                table_insert(commands, command, cid);
         }
     }
     return commands;
@@ -136,7 +137,7 @@ int user_login() // function for authenticating input against a credentials.txt 
     FILE *fp = fopen("credentials.txt", "r"); 
     if (fp != NULL){
         while ( fgets(buffer, len, fp)  != NULL) {
-            printf(userString);
+            printf("%s\n",userString);
             buffer[strcspn(buffer, "\n")] = 0;   // without this, `strcmp` would return false
             if (strcmp(userString,buffer)==0){
                     return 1;
@@ -237,19 +238,19 @@ int read_command(char *  command, hashtable * commands, char parameters[10][10])
     return 1;
 }
 
-int exec_command(int opcode, char parameters[10][10]) // pass in the command and up to 10 arguments
+int exec_command(int cid, char parameters[10][10]) // pass in the command and up to 10 arguments
 {
-    if(opcode == 1){
+    if(cid == 1){
         pwd();
-    }else if(opcode == 2){
+    }else if(cid == 2){
         //copy();
-    }else if(opcode == 3){
+    }else if(cid == 3){
         system("ps -ef");
-    }else if(opcode == 4){
+    }else if(cid == 4){
         system("df");
-    }else if(opcode == 5){
+    }else if(cid == 5){
         //system("grep " + parameters);
-    }else if(opcode == 6){
+    }else if(cid == 6){
         history();
     }
 
@@ -275,9 +276,9 @@ int main()
             char  command[20]; // commands can be only 20 characters long
             char parameters[10][10];// up to 10 parameters 
             memset(parameters, 0, sizeof(parameters[0][0]) * 10 * 10);
-            int opcode = read_command(command, commands, parameters); // input from terminal 
+            int cid = read_command(command, commands, parameters); // input from terminal 
             int status;
-            if (opcode > 0)
+            if (cid > 0)
             { 
                 if (wait(&status)>=0)
                 { 
@@ -286,7 +287,7 @@ int main()
                 }
                 else
                 { 
-                    exec_command(opcode, parameters); // execute command 
+                    exec_command(cid, parameters); // execute command 
                 } 
             }
             else { 
