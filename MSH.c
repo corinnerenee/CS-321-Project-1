@@ -208,15 +208,7 @@ int pwd(){ // change the logged in users password
 int copy(char * fileName1, char * fileName2){ // copy a file from one directory to another.
   
 }
-int ps(){ // 
 
-}
-int df(){ //
-
-}
-int search(){
-
-}
 int history(){ // return the history of the commands entered -> probably need to stored this information in a file structure?
     for (size_t i = 0; i < 100; i++)
     {
