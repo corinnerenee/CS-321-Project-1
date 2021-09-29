@@ -196,9 +196,6 @@ int pwd(){ // change the logged in users password
      
 
 }
-int copy(char * fileName1, char * fileName2){ // copy a file from one directory to another.
-  
-}
 
 int history(){ // return the history of the commands entered -> probably need to stored this information in a file structure?
     for (size_t i = 0; i < 100; i++)
@@ -243,7 +240,16 @@ int exec_command(int cid, char parameters[10][10]) // pass in the command and up
     if(cid == 1){
         pwd();
     }else if(cid == 2){
-        //copy();
+        if (parameters[0][0] != '\0' && parameters[1][0] !='\0'  ){ // make sure params are valid
+            char command_string[100]="cp ";
+            strcat(command_string,parameters[0]);
+            strcat(command_string," ");
+            strcat(command_string,parameters[1]);
+            system(command_string);
+        }else{
+            printf("Missing Parameters!\n");
+        }
+        
     }else if(cid == 3){
         system("ps -ef");
     }else if(cid == 4){
@@ -253,14 +259,6 @@ int exec_command(int cid, char parameters[10][10]) // pass in the command and up
     }else if(cid == 6){
         history();
     }
-
-    for (size_t i = 0; i < 10; i++)
-    {
-        if(strcmp(parameters[i], "")){
-            printf("%s\n", parameters[i]);
-        }
-    }
-    
     return 0;
 }
 
