@@ -129,7 +129,7 @@ int user_login() // function for authenticating input against a credentials.txt 
     fgets(username, 20, stdin);
     printf("Password: ");
     fgets(password, 20, stdin);
-
+    
     username[strcspn(username, "\n")] = 0; // without this, `strcmp` would return false
     password[strcspn(password, "\n")] = 0; // without this, `strcmp` would return false
 
@@ -138,19 +138,18 @@ int user_login() // function for authenticating input against a credentials.txt 
     strcat(userString, password); // userstring is username+password
 
     //encrpyt userString
-    strcpy(userString, crypt(userString, "AA")); // (desired string , hash value for encryption)
+    strcpy(userString, crypt(userString, "22")); // (desired string , hash value for encryption)
 
     userString[strcspn(userString, "\n")] = 0; // without this, `strcmp` would return false
 
     size_t len = 100;
     char buffer[len];
-    return 1;
+   
     FILE *fp = fopen("credentials.txt", "r");
     if (fp != NULL)
     {
         while (fgets(buffer, len, fp) != NULL)
         {
-            printf("%s\n", userString);
             buffer[strcspn(buffer, "\n")] = 0; // without this, `strcmp` would return false
             if (strcmp(userString, buffer) == 0)
             {
@@ -188,7 +187,7 @@ int pwd()
     strcat(userString, password); // userstring is username+password
 
     //encrpyt userString
-    strcpy(userString, crypt(userString, "AA")); // (desired string , hash value for encryption)
+    strcpy(userString, crypt(userString, "22")); // (desired string , hash value for encryption)
 
     userString[strcspn(userString, "\n")] = 0; // without this, `strcmp` would return false
 
