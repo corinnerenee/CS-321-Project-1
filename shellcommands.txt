@@ -1,0 +1,7 @@
+pwd:1
+copy:2
+ps:3
+df:4
+search:5
+history:6
+logout:7
