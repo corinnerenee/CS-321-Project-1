@@ -251,9 +251,19 @@ int exec_command(int cid, char parameters[10][10]) // pass in the command and up
             printf("Missing Parameters!\n");
         }
     }else if(cid == 3){ // ps
-        system("ps -ef");
+        char command_string[100]="ps -ef";
+        if (parameters[0][0]!= '\0'){
+            strcat(command_string, "| grep ");
+            strcat(command_string,parameters[0]);
+        }
+        system(command_string);
     }else if(cid == 4){ // df
-        system("df");
+            char command_string[100]="df -k";
+            if (parameters[0][0]!= '\0'){
+                strcat(command_string, "| grep ");
+                strcat(command_string,parameters[0]);
+            }
+            system(command_string);
     }else if(cid == 5){ //search
         if (parameters[0][0] != '\0' && parameters[1][0] !='\0'  ){ // make sure params are valid
             char command_string[100]="grep ";
@@ -261,13 +271,15 @@ int exec_command(int cid, char parameters[10][10]) // pass in the command and up
             strcat(command_string," ");
             strcat(command_string,parameters[1]);
             system(command_string);
-            
         }else{
             printf("Missing Parameters!\n");
         }
     }else if(cid == 6){//history
         history();
+    }else if(cid == 7){ //logout
+        exit(0);
     }
+
     return 0;
 }
 
